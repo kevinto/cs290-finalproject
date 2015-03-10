@@ -1,36 +1,39 @@
 <?php
-session_start();
-error_reporting(E_ALL);
-ini_set('display_errors', 'On');
+  //session_start();
+  error_reporting(E_ALL);
+  ini_set('display_errors', 'On');
+  include  'storedInfo.php';
+  
+  // Test MYSQL connection. The authentication information is in a separate file
+  $mysqli = new mysqli("oniddb.cws.oregonstate.edu", $myUsername, $myPassword, $myUsername);
+  if ($mysqli->connect_errno) {
+    echo "Failed to connect to MYSQL <br>";
+  }
 
-// If logout parameter is get, destroy the current session cookie
-if (isset($_GET['logoff']) && $_GET['logoff'] === 'true') {
-  $_SESSION = array();
-  session_destroy();
-}
+  if ($_SERVER['REQUEST_METHOD'] === 'GET' and count($_GET) > 0) {
+    // Insert one new customer
+    if (isset($_GET['registerUser']) && isset($_GET['username'])
+      && isset($_GET['password']) && isset($_GET['passwordRepeated'])
+      && isset($_GET['email']) && isset($_GET['emailRepeated'])) {
 
-// Set up the redirect to content1 page
-$filePath = explode('/', $_SERVER['PHP_SELF'], -1);
-$filePath = implode('/', $filePath);
-$redirect = "https://" . $_SERVER['HTTP_HOST'] . $filePath;
-$contentRedirect = $redirect . '/content1.php';
+      // Check if there are any empty parameters
+      if ($_GET['username'] !== '' && $_GET['password'] !== ''
+        && $_GET['passwordRepeated'] !== '' && $_GET['email'] !== ''
+        && $_GET['emailRepeated'] !== '') {
+
+        registerUser();
+        die();
+      }
+      else {
+        echo 'EmptyParams';
+        die();
+      }
+    }
+  }
+
+  function registerUser() {
+    echo 'bleh';
+    die();
+  }
 
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Login</title>
-</head>
-<body>
-  <form action=<?=$contentRedirect?> method="post">
-    <fieldset>
-      <label>User Name: </label>
-      <input type="text" name="username"><br>
-    </fieldset>
-    <fieldset>
-      <input type="submit" value="Login">
-    </fieldset>
-  </form>
-</body>
-</html>

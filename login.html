@@ -23,27 +23,27 @@
       </form>
     </div>
     <div class="container">        
-      <form id="form-registration" onsubmit="alert('hello from registration');">
+      <form id="form-registration" onsubmit="return registerUser();">
         <h2 class="dark-grey">Registration</h2>
         <div class="form-group col-lg-12">
           <label>Username</label>
-          <input type="" name="" class="form-control" id="" value="">
+          <input type="" id="regUsername" class="form-control" id="" value="">
         </div>
         <div class="form-group col-lg-6">
           <label>Password</label>
-          <input type="password" name="" class="form-control" id="" value="">
+          <input type="password" id="regPassword" class="form-control" id="" value="">
         </div>
         <div class="form-group col-lg-6">
           <label>Repeat Password</label>
-          <input type="password" name="" class="form-control" id="" value="">
+          <input type="password" id="regRepeatPassword" class="form-control" id="" value="">
         </div>
         <div class="form-group col-lg-6">
           <label>Email Address</label>
-          <input type="" name="" class="form-control" id="" value="">
+          <input type="" id="regEmail" class="form-control" id="" value="">
         </div>
         <div class="form-group col-lg-6">
           <label>Repeat Email Address</label>
-          <input type="" name="" class="form-control" id="" value="">
+          <input type="" id="regRepeatEmail" class="form-control" id="" value="">
         </div>      
         <button type="submit" class="btn btn-lg btn-primary btn-block">Register</button>
         <button type="button" class="btn btn-lg btn-primary btn-block" onclick="showSignIn();">Cancel Registration</button>
