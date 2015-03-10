@@ -30,19 +30,32 @@ function registerUser() {
   var passwordRepeated = document.getElementById('regRepeatPassword').value;
   var email = document.getElementById('regEmail').value;
   var emailRepeated = document.getElementById('regRepeatEmail').value;
+  var birthday = document.getElementById('birthday').value;
 
   // Create Return function
   var regUserFunc = function(request){
     return function() {
       if(request.readyState == 4) {
-        // if (request.responseText === 'EmptyParams') {
-        //   alert('One of the values you entered for a new customer insertion was empty. Please fill out the required fields and resubmit.');
-        // }
-        // else {
-        //   alert('Customer Add Successful');
-        // }
+        var errContainer = document.getElementById('errorMessages');
 
-        location.reload();
+        switch (request.responseText) {
+          case 'emptyParams':
+            errContainer.innerText = 'Please fill out all the values and re-submit.';
+            break;
+          case 'passwordsNotMatching':
+            clearRegPasswords();
+            errContainer.innerText = 'Please re-enter your passwords. They do not match.';
+            break;
+          case 'emailsNotMatching':
+            clearRegEmails();
+            errContainer.innerText = 'Please re-enter your emails. They do not match.';
+            break;
+          default:
+            alert('Registration Successful.');
+            break;
+        }
+        
+        // location.reload();
       }
     }
   };
@@ -53,7 +66,8 @@ function registerUser() {
     password: password,
     passwordRepeated: passwordRepeated,
     email: email,
-    emailRepeated: emailRepeated
+    emailRepeated: emailRepeated,
+    birthday: birthday
   };
 
   callLoginPhp('registerUser', regUserFunc, userRegParams);
@@ -61,6 +75,15 @@ function registerUser() {
   return false;
 }
 
+function clearRegPasswords() {
+  document.getElementById('regPassword').value = '';
+  document.getElementById('regRepeatPassword').value = '';
+}
+
+function clearRegEmails() {
+  document.getElementById('regEmail').value = '';
+  document.getElementById('regRepeatEmail').value = '';
+}
 /*
 * Calls the backend PHP code
 * @param {string} phpFuncName - action you want the backend PHP
