@@ -144,9 +144,9 @@ function clearUsername() {
 /*
 * Calls the backend PHP code
 * @param {object} returnFunc - function that is executed after PHP
-*                              function is done executing
+*                              backend is done executing
 * @param {object} postParams - params you want to pass to the PHP backend
-* @param {bool} optionalParams - optional params you want to pass
+* @param {bool} isSynchronous - make this call a sync
 */
 // Here optional parameters is supposed to be an array
 // function callLoginPhp(phpFuncName, returnFunc, optionalParams) {
@@ -208,4 +208,8 @@ function logout() {
 
 function isUserLoggedIn() {
 
+}
+
+function goToLogin() {
+  location.replace('login.html');
 }

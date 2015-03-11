@@ -1,4 +1,4 @@
-function checkIfSignedIn() {
+function checkIfSignedInForLandingPage() {
   // Create Return function
   var signOnReturnFunc = function(request){
     return function() {
@@ -34,8 +34,4 @@ function checkIfSignedIn() {
 
 function continueToApp() {
   location.replace('app.html');
-}
-
-function goToLogin() {
-  location.replace('login.html');
 }
