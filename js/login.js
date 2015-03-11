@@ -2,8 +2,6 @@ function determineLoginOrReg() {
   // Hide the registration form
   var regForm = document.getElementById('form-registration');
   regForm.style.display = 'none';
-
-  // Hide the 
 }
 
 function showRegistration() {
@@ -43,8 +41,7 @@ function validateSignOn() {
             errContainer.innerText = 'Username or password is incorrect. Please try again.';
             break;
           case 'loginSuccessful':
-            alert('Sign-In Successful.');
-            location.reload();
+            location.replace('app.html');
             break;
           default:
             errContainer.innerText = 'Please retry or call an administrator. There was an error at the server.';
@@ -146,22 +143,19 @@ function clearUsername() {
 
 /*
 * Calls the backend PHP code
-* @param {string} phpFuncName - action you want the backend PHP
-*                                                       to perform
 * @param {object} returnFunc - function that is executed after PHP
-*                                                  function is done executing
-* @param {object} optionalParams - optional params you want to pass
-*                                                         to the PHP backend
+*                              function is done executing
+* @param {object} postParams - params you want to pass to the PHP backend
+* @param {bool} optionalParams - optional params you want to pass
 */
 // Here optional parameters is supposed to be an array
 // function callLoginPhp(phpFuncName, returnFunc, optionalParams) {
-function callLoginPhp(returnFunc, postParams) {
+function callLoginPhp(returnFunc, postParams, isSynchronous) {
   if (typeof(postParams) === 'undefined') {
     postParams = '';
   }
 
   var request = new XMLHttpRequest();
-  // var url = 'login.php?' + phpFuncName + '=true';
   var url = 'login.php';
   var postParamsStr = '';
 
@@ -192,5 +186,26 @@ function callLoginPhp(returnFunc, postParams) {
 }
 
 function logout() {
-  alert('logging out');
+
+  // Create Return function
+  var signOffReturnFunc = function(request){
+    return function() {
+      if(request.readyState == 4) {
+        location.replace('index.html');
+      }
+    }
+  };
+
+  // Create Php parameters
+  var userParams = {
+    logoff: true,
+  };
+
+  callLoginPhp(signOffReturnFunc, userParams);
+
+  return false; 
+}
+
+function isUserLoggedIn() {
+
 }

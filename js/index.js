@@ -11,8 +11,7 @@ function checkIfSignedIn() {
             container.innerHTML = '<button class="btn btn-lg btn-primary btn-block" type="button" onclick="goToLogin();">Login or Register to continue to app.</button>'
             break;
           case 'loggedIn':
-            // container.innerText = 'You are logged in. Click here to continue. Click here to log out';
-            container.innerHTML = '<button class="btn btn-lg btn-primary btn-block" type="button" onclick="showRegistration();">It looks like you are logged in. Click this button to continue to the app.</button>' +
+            container.innerHTML = '<button class="btn btn-lg btn-primary btn-block" type="button" onclick="continueToApp();">It looks like you are logged in. Click this button to continue to the app.</button>' +
                                   '<button class="btn btn-lg btn-primary btn-block" type="button" onclick="logout();">Logout</button>';
             break;
           default:
@@ -31,4 +30,12 @@ function checkIfSignedIn() {
   callLoginPhp(signOnReturnFunc, userParams);
 
   return false;
+}
+
+function continueToApp() {
+  location.replace('app.html');
+}
+
+function goToLogin() {
+  location.replace('login.html');
 }
