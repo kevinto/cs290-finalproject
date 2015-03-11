@@ -190,3 +190,7 @@ function callLoginPhp(returnFunc, postParams) {
   request.send(postParamsStr);
   return request;
 }
+
+function logout() {
+  alert('logging out');
+}

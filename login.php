@@ -60,6 +60,26 @@
       }
     die();
     }
+
+    // Check if user is already signed in
+    if (isset($_POST['checkIfSignedIn']) && session_status() == PHP_SESSION_ACTIVE) {
+
+      $returnArr = array('status' => "", 'username' => "");
+
+      if (!isset($_SESSION['username'])) {
+        $returnArr['status'] = "notLoggedIn";
+        // echo "notLoggedIn";
+      }
+      else {
+        $returnArr['status'] = "loggedIn";
+        $returnArr['username'] = $_SESSION['username'];
+        // echo "loggedIn as $_SESSION[username]";
+      }
+
+      $jsonReturn = json_encode($returnArr);
+      echo $jsonReturn;
+      die();
+    }
   }
 
   function validateSignOn($username, $password) {
