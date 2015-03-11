@@ -3,7 +3,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>ToDo App Sign-in</title>
+    <title>Stock App Sign-in</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/login.css" rel="stylesheet">
     <script src='js/login.js'></script>
@@ -11,14 +11,15 @@
   <body onload="determineLoginOrReg();">
     <div class="container">
       <div class="header">
-        <h3 class="text-muted">ToDo App</h3>
+        <h3 class="text-muted">Stock Tracking Utility</h3>
       </div>
-      <form id="form-signin" onsubmit="alert('hello from sign-in');">
+      <form id="form-signin" onsubmit="return validateSignOn();">
         <h2 class="form-signin-heading">Please sign in</h2>
+        <div id="signOnErrMessages"></div>
         <label for="inputUsername" class="sr-only">Username</label>
-        <input type="email" id="inputUsername" class="form-control" placeholder="Username" required autofocus>
+        <input type="text" id="inputUsername" class="form-control" placeholder="Username" required autofocus minlength="8" maxlength="30">
         <label for="inputPassword" class="sr-only">Password</label>
-        <input type="password" id="inputPassword" class="form-control" placeholder="Password" required>
+        <input type="password" id="inputPassword" class="form-control" placeholder="Password" required minlength="8" maxlength="30">
         <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
         <button class="btn btn-lg btn-primary btn-block" type="button" onclick="showRegistration();">Register</button>
       </form>
@@ -26,9 +27,9 @@
     <div class="container">        
       <form id="form-registration" onsubmit="return registerUser();">
         <h2 class="dark-grey">Registration</h2>
-        <div id="errorMessages"></div>
+        <div id="regErrMessages"></div>
         <div class="form-group col-lg-12">
-          <label>Username</label>
+          <label>Username (min characters: 8. max characters: 30)</label>
           <input type="text" id="regUsername" class="form-control" minlength="8" maxlength="30" value="">
         </div>
         <div class="form-group col-lg-12">
@@ -36,11 +37,11 @@
           <input type="date" id="birthday" min="1800-01-01" max="9999-01-01">
         </div>
         <div class="form-group col-lg-6">
-          <label>Password</label>
+          <label>Password (min characters: 8. max characters: 30)</label>
           <input type="password" id="regPassword" class="form-control" value="" minlength="8" maxlength="30">
         </div>
         <div class="form-group col-lg-6">
-          <label>Repeat Password</label>
+          <label>Repeat Password (min characters: 8. max characters: 30)</label>
           <input type="password" id="regRepeatPassword" class="form-control"  value="" minlength="8" maxlength="30">
         </div>
         <div class="form-group col-lg-6">

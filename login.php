@@ -1,8 +1,14 @@
 <?php
-  //session_start();
+  session_start();
   error_reporting(E_ALL);
   ini_set('display_errors', 'On');
   include  'storedInfo.php';
+
+  // If logout parameter is get, destroy the current session cookie
+  if (isset($_POST['logoff']) && $_POST['logoff'] === 'true') {
+    $_SESSION = array();
+    session_destroy();
+  }
 
   // Test MYSQL connection. The authentication information is in a separate file
   $mysqli = new mysqli("oniddb.cws.oregonstate.edu", $myUsername, $myPassword, $myUsername);
@@ -10,20 +16,21 @@
     echo "Failed to connect to MYSQL <br>";
   }
 
-  if ($_SERVER['REQUEST_METHOD'] === 'GET' and count($_GET) > 0) {
-    // Insert one new customer
-    if (isset($_GET['registerUser']) && isset($_GET['username'])
-      && isset($_GET['password']) && isset($_GET['passwordRepeated'])
-      && isset($_GET['email']) && isset($_GET['emailRepeated']) 
-      && isset($_GET['birthday'])) {
+  if ($_SERVER['REQUEST_METHOD'] === 'POST' and count($_POST) > 0) {
 
-      // Check if there are any empty parameters
-      if ($_GET['username'] !== '' && $_GET['password'] !== ''
-        && $_GET['passwordRepeated'] !== '' && $_GET['email'] !== ''
-        && $_GET['emailRepeated'] !== '' && $_GET['birthday'] !== '') {
+    // Register a user
+    if (isset($_POST['registerUser']) && isset($_POST['username'])
+      && isset($_POST['password']) && isset($_POST['passwordRepeated'])
+      && isset($_POST['email']) && isset($_POST['emailRepeated']) 
+      && isset($_POST['birthday'])) {
 
-        registerUser($_GET['username'], $_GET['password'], $_GET['passwordRepeated'], $_GET['email'], 
-          $_GET['emailRepeated'], $_GET['birthday']);
+      // Check for any empty parameters
+      if ($_POST['username'] !== '' && $_POST['password'] !== ''
+        && $_POST['passwordRepeated'] !== '' && $_POST['email'] !== ''
+        && $_POST['emailRepeated'] !== '' && $_POST['birthday'] !== '') {
+
+        registerUser($_POST['username'], $_POST['password'], $_POST['passwordRepeated'], $_POST['email'], 
+          $_POST['emailRepeated'], $_POST['birthday']);
         die();
       }
       else {
@@ -31,6 +38,62 @@
         die();
       }
     }
+    
+    // Authenticate a user 
+    if (isset($_POST['validateSignOn']) && isset($_POST['username'])
+      && isset($_POST['password'])) {
+
+      // Check for any empty parameters
+      if ($_POST['username'] !== '' && $_POST['password'] !== '') {
+
+        if (validateSignOn($_POST['username'], $_POST['password']) 
+          && session_status() == PHP_SESSION_ACTIVE) {
+          // Set login cookies
+          $_SESSION['username'] = $_POST['username'];
+        }
+
+        die();
+      }
+      else {
+        echo 'emptyParams';
+        die();
+      }
+    die();
+    }
+  }
+
+  function validateSignOn($username, $password) {
+    global $mysqli;
+
+    // Prepare the select statment
+    if (!($stmt = $mysqli->prepare("SELECT id from users where username=? and password=?;"))) {
+      echo "Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error;
+      return false;
+    }
+
+    if (!$stmt->bind_param("ss", $username, $password)) {
+      echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+      return false;
+    }
+
+    if (!$stmt->execute()) {
+      echo "Execute failed: (" . $mysqli->errno . ") " . $mysqli->error;
+      return false;
+    }
+
+    if (!($res = $stmt->get_result())) {
+      echo "Getting result set failed: (" . $stmt->errno . ") " . $stmt->error;
+      return false;
+    }
+
+    // if no results were returned, invalid user.
+    if ($res->num_rows === 0) {
+      echo "authenFailed";
+      return false;
+    }
+
+    echo "loginSuccessful";
+    return true;
   }
 
   function registerUser($username, $password, $passwordRepeated, $email, $emailRepeated, $birthday) {
@@ -44,9 +107,13 @@
 
     // Check that email's match
     if ($email !== $emailRepeated) {
-      echo $email;
-      echo $emailRepeated;
       echo "emailsNotMatching";
+      die();
+    }
+
+    // Check if user name already exists
+    if (usernameExists($username)) {
+      echo "usernameDuplicate";
       die();
     }
 
@@ -68,6 +135,36 @@
       echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
       die();
     }
+
+    echo "registrationSuccessful";
   }
 
+  function usernameExists($username) {
+    global $mysqli;
+
+    // Prepare the select statment
+    if (!($stmt = $mysqli->prepare("SELECT id from users where username=?;"))) {
+      echo "Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error;
+      die();
+    }
+
+    if (!$stmt->bind_param("s", $username)) {
+          echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+    }
+
+    if (!$stmt->execute()) {
+      echo "Execute failed: (" . $mysqli->errno . ") " . $mysqli->error;
+    }
+
+    if (!($res = $stmt->get_result())) {
+      echo "Getting result set failed: (" . $stmt->errno . ") " . $stmt->error;
+    }
+
+    // No results were returned, exit.
+    if ($res->num_rows === 0) {
+      return false;
+    }
+    
+    return true;
+  }
 ?>

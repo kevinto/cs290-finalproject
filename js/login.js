@@ -22,6 +22,56 @@ function showSignIn() {
   signInForm.style.display = 'inline';
 }
 
+function validateSignOn() {
+
+  // Get form values 
+  var username = document.getElementById('inputUsername').value;
+  var password = document.getElementById('inputPassword').value;
+
+  // Create Return function
+  var signOnReturnFunc = function(request){
+    return function() {
+      if(request.readyState == 4) {
+        var errContainer = document.getElementById('signOnErrMessages');
+
+        switch (request.responseText) {
+          case 'emptyParams':
+            errContainer.innerText = 'Please fill out all the values and re-submit.';
+            break;
+          case 'authenFailed':
+            clearSignOnInfo();
+            errContainer.innerText = 'Username or password is incorrect. Please try again.';
+            break;
+          case 'loginSuccessful':
+            alert('Sign-In Successful.');
+            location.reload();
+            break;
+          default:
+            errContainer.innerText = 'Please retry or call an administrator. There was an error at the server.';
+            break;
+        }
+      }
+    }
+  };
+
+  // Create Php parameters
+  var userParams = {
+    validateSignOn: true,
+    username: username,
+    password: password,
+  };
+
+  // callLoginPhp('validateSignOn', signOnReturnFunc, userParams);
+  callLoginPhp(signOnReturnFunc, userParams);
+
+  return false;
+}
+
+function clearSignOnInfo() {
+  var username = document.getElementById('inputUsername').value = '';
+  var password = document.getElementById('inputPassword').value = '';
+}
+
 function registerUser() {
 
   // Get form values
@@ -36,7 +86,7 @@ function registerUser() {
   var regUserFunc = function(request){
     return function() {
       if(request.readyState == 4) {
-        var errContainer = document.getElementById('errorMessages');
+        var errContainer = document.getElementById('regErrMessages');
 
         switch (request.responseText) {
           case 'emptyParams':
@@ -50,18 +100,22 @@ function registerUser() {
             clearRegEmails();
             errContainer.innerText = 'Please re-enter your emails. They do not match.';
             break;
+          case 'usernameDuplicate':
+            clearUsername();
+            errContainer.innerText = 'Username already exists. Please enter another username.';
+            break;
           default:
-            alert('Registration Successful.');
+            alert('Registration Successful. Please Login.');
+            location.reload();
             break;
         }
-        
-        // location.reload();
       }
     }
   };
 
   // Create Php parameters
   var userRegParams = {
+    registerUser: true,
     username: username,
     password: password,
     passwordRepeated: passwordRepeated,
@@ -70,7 +124,8 @@ function registerUser() {
     birthday: birthday
   };
 
-  callLoginPhp('registerUser', regUserFunc, userRegParams);
+  // callLoginPhp('registerUser', regUserFunc, userRegParams);
+  callLoginPhp(regUserFunc, userRegParams);
 
   return false;
 }
@@ -84,6 +139,11 @@ function clearRegEmails() {
   document.getElementById('regEmail').value = '';
   document.getElementById('regRepeatEmail').value = '';
 }
+
+function clearUsername() {
+  document.getElementById('regUsername').value = '';
+}
+
 /*
 * Calls the backend PHP code
 * @param {string} phpFuncName - action you want the backend PHP
@@ -94,19 +154,28 @@ function clearRegEmails() {
 *                                                         to the PHP backend
 */
 // Here optional parameters is supposed to be an array
-function callLoginPhp(phpFuncName, returnFunc, optionalParams) {
-  if (typeof(optionalParams) === 'undefined') {
-    optionalParams = '';
+// function callLoginPhp(phpFuncName, returnFunc, optionalParams) {
+function callLoginPhp(returnFunc, postParams) {
+  if (typeof(postParams) === 'undefined') {
+    postParams = '';
   }
 
   var request = new XMLHttpRequest();
-  var url = 'login.php?' + phpFuncName + '=true';
+  // var url = 'login.php?' + phpFuncName + '=true';
+  var url = 'login.php';
+  var postParamsStr = '';
 
-  // Need to find a way to iterate through the properties of the JS
-  if (optionalParams.length !== 0) {
-    for (var property in optionalParams) {
-      if (optionalParams.hasOwnProperty(property)) {
-        url += '&' + property + '=' + optionalParams[property];
+  // Create the post parameter string
+  if (postParams.length !== 0) {
+    var i = 0;
+    for (var property in postParams) {
+      if (postParams.hasOwnProperty(property)) {
+        if (i === 0) {postParamsStr += property + '=' + postParams[property];
+        }
+        else {
+          postParamsStr += '&' + property + '=' + postParams[property];
+        }
+        i++;
       }
     }
   }
@@ -116,7 +185,8 @@ function callLoginPhp(phpFuncName, returnFunc, optionalParams) {
   }
 
   request.onreadystatechange = returnFunc(request);
-  request.open('GET', url, true);
-  request.send(null);
+  request.open('POST', url, true);
+  request.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+  request.send(postParamsStr);
   return request;
 }
