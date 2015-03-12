@@ -30,6 +30,11 @@
 
       addUserStock($_SESSION['username'], $_POST['stockSymbol'], $_POST['stockAmt']);
     }
+
+    // Get all user's stock
+    if (isset($_POST['getUserStocks'])) {
+      getUserStocks($_SESSION['username']);
+    }
   }
 
   function addUserStock($username, $stockSymbol, $stockAmt) {
@@ -211,5 +216,55 @@
     }
 
     return $resultArr;
+  }
+
+  /*
+  * Purpose: Gets all the users's stocks
+  * @param {int} $username - the user name
+  * @return {object} - a JSON object all the customer's stocks 
+  */
+  function getUserStocks($username) {
+    global $mysqli;
+
+    // Prepare the select statment
+    if (!($stmt = $mysqli->prepare("SELECT us.stock_name as 'Stock Name', us.stock_symbol as 'Stock Symbol', 
+      us.stock_price as 'Stock Price', uhs.amount as 'Quantity Monitored' 
+      FROM users u INNER JOIN user_has_stocks uhs ON u.id=uhs.user_id 
+      INNER JOIN user_stocks us ON uhs.stock_id=us.id 
+      WHERE u.username=?;"))) {
+      echo "Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error;
+      die();
+    }
+
+    if (!$stmt->bind_param("s", $username)) {
+          echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+    }
+
+    if (!$stmt->execute()) {
+      echo "Execute failed: (" . $mysqli->errno . ") " . $mysqli->error;
+    }
+
+    if (!($res = $stmt->get_result())) {
+      echo "Getting result set failed: (" . $stmt->errno . ") " . $stmt->error;
+    }
+
+    // No results were returned, exit.
+    if ($res->num_rows === 0) {
+      echo "noRecords";
+      return;
+    }
+
+    // Generate the return object
+    for($row_no = ($res->num_rows - 1); $row_no >= 0; $row_no--) {
+      $res->data_seek($row_no);
+      $row = $res->fetch_assoc();
+
+      $row["Price x Quantity"] = $row["Stock Price"] * $row["Quantity Monitored"];
+
+      $stocksArr[] = json_encode($row);
+    }
+
+    $finaljson = json_encode($stocksArr);
+    echo $finaljson;
   }
 ?>

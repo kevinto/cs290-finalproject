@@ -59,7 +59,99 @@ function EnableNotLoggedInMode() {
 }
 
 function generateUserStkTable() {
+  // UI Table columns: stock name, stock symbol, price per share, quantity monitored, price x quantity
 
+  // Define a return function
+  var userStockTableFunc = function(request){
+    return function() {
+      if(request.readyState == 4) {
+
+        // Get div to populate with data
+        var containerId = 'current-stocks-held';
+        var container = document.getElementById(containerId);
+
+        // If no data is returned, exit the function
+        if (request.responseText === 'noRecords') {
+          var errText = document.createElement('p');
+          errText.id = 'errorMsgs';
+          errText.innerText = "No stocks currently monitored";
+          container.appendChild(errText);
+          return;
+        }
+
+        // Result is an array of JSON objects
+        var resultObj = JSON.parse(request.responseText);
+
+        // Create an array of JSON objects that we will make rows
+        //    out of
+        var tableParamObj = new Array();
+        for (var i = 0; i < resultObj.length; i++) {
+          tableParamObj.push(JSON.parse(resultObj[i]));
+        }
+
+        // Generate a table
+        addTable(containerId, tableParamObj, 'userStockTable');
+      }
+    }
+  };
+
+  // Create object that holds the SQL query parameters
+  var userParams = {
+    getUserStocks: true,
+  };
+
+  callAppPhp(userStockTableFunc, userParams);
+}
+
+/*
+* Adds a table for the database records. The table will contain
+* header columns based off the JSON property names.
+* @param {string} targetDiv - id of the Div you want to insert the
+*                                              table into.
+* @param {array} dispObjArray - an array of JSON objects containing
+*                                                     database tuples
+* @param {array} tableID - the id of the table you want to creates
+*/
+function addTable(targetDiv, dispObjArray, tableID) {
+
+  var myTableDiv = document.getElementById(targetDiv);
+
+  var table = document.createElement('table');
+  table.className = 'table';
+  table.id = tableID;
+
+  // Create the header columns
+  var headersAlreadyCreated = false
+  for (var i = 0; i < dispObjArray.length; i++){
+    if (!headersAlreadyCreated) {
+      var tr = document.createElement('tr');
+      table.appendChild(tr);
+      for (var property in dispObjArray[i]) {
+        if (dispObjArray[i].hasOwnProperty(property)) {
+
+          var th = document.createElement('th');
+          th.appendChild(document.createTextNode(property));
+          tr.appendChild(th);
+        }
+      }
+
+      headersAlreadyCreated = true;
+    }
+
+    // Create the rows for the data
+    tr = document.createElement('tr');
+    table.appendChild(tr);
+    for (var property in dispObjArray[i]) {
+      if (dispObjArray[i].hasOwnProperty(property)) {
+
+        var td = document.createElement('td');
+        td.appendChild(document.createTextNode(dispObjArray[i][property]));
+        tr.appendChild(td);
+      }
+    }
+  }
+
+  myTableDiv.appendChild(table);
 }
 
 function addUserStock() {
