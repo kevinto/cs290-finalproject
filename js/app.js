@@ -7,18 +7,16 @@ function checkIfSignedInForAppPage() {
 
         switch (resultObj.status) {
           case 'notLoggedIn':
-            var signedOutHeader = document.getElementById('not-loggedin-intro');
-            signedOutHeader.innerText = 'You are not currently signed in. Please click the sign in button on the top of the page.';
-
-            var logoutBtn = document.getElementById('logout-button');
-            logoutBtn.style.display = 'none';
+            EnableNotLoggedInMode();
             break;
           case 'loggedIn':
-            // container.innerHTML = '<button class="btn btn-lg btn-primary btn-block" type="button" onclick="continueToApp();">It looks like you are logged in. Click this button to continue to the app.</button>' +
-                                  // '<button class="btn btn-lg btn-primary btn-block" type="button" onclick="logout();">Logout</button>';
+            EnableLoggedInMode(resultObj.username); 
+
+            generateUserStkTable();
             break;
           default:
-            // container.innerText = 'It seems like the server is not responding. Please try again later.';
+            var signedOutHeader = document.getElementById('not-loggedin-intro');
+            signedOutHeader.innerText = 'Something is wrong at the server. Please try again later.';
             break;
         }
       }
@@ -33,4 +31,24 @@ function checkIfSignedInForAppPage() {
   callLoginPhp(signOnReturnFunc, userParams);
 
   return false;
+}
+
+function EnableLoggedInMode(username) {
+ var signedInHeader = document.getElementById('user-intro');
+  signedInHeader.innerText = 'Hi, ' + username;
+
+  var signInBtn = document.getElementById('signin-button');
+  signInBtn.style.display = 'none';
+}
+
+function EnableNotLoggedInMode() {
+  var signedOutHeader = document.getElementById('not-loggedin-intro');
+  signedOutHeader.innerText = 'You are not currently signed in. Please click the sign in button on the top of the page.';
+
+  var logoutBtn = document.getElementById('logout-button');
+  logoutBtn.style.display = 'none';
+}
+
+function generateUserStkTable() {
+
 }
