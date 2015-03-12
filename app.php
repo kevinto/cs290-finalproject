@@ -38,20 +38,93 @@
       die();
     }
     else {
+      $stockAmt = intval($stockAmt);
+
       addStockToStocksTable($stockSymbol);
-      //associateStockToUser();
+      associateStockToUser($username, $stockSymbol, $stockAmt);
+      echo 'stockAssociationSuccessful';
       die();
     } 
+  }
+
+  function associateStockToUser($username, $stockSymbol, $stockAmt) {
+    global $mysqli;
+
+    // Exit this function if stock doesnt not exist in the DB 
+    if (!stockAlreadyExists($stockSymbol)) {
+      return;
+    }
+
+    // Exit this workflow if association already exists
+    if (stockAlreadyAssociatedToUser($username, $stockSymbol)) {
+      echo "stockAssociationAlreadyExists";
+      die();
+    }
+
+    // Prepare the insert statment
+    if (!($stmt = $mysqli->prepare("INSERT INTO user_has_stocks(user_id, stock_id, amount) 
+      VALUES ((SELECT id FROM users WHERE username=? LIMIT 1), 
+        (SELECT id FROM user_stocks WHERE stock_symbol=? LIMIT 1), 
+        ?);"))) {
+
+      echo "Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error;
+      die();
+    }
+
+    // Add values to SQL insert statement
+    if (!$stmt->bind_param("ssi", $username, $stockSymbol, $stockAmt)) {
+      echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+      die();
+    }
+
+    // Execute sql statement
+    if (!$stmt->execute()) {
+      echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+      die();
+    }
+  }
+
+  function stockAlreadyAssociatedToUser($username, $stockSymbol) {
+    global $mysqli;
+
+    // Prepare the select statment
+    if (!($stmt = $mysqli->prepare("SELECT uhs.id 
+      FROM users u INNER JOIN user_has_stocks uhs ON u.id=uhs.user_id 
+      INNER JOIN user_stocks us ON uhs.stock_id=us.id 
+      WHERE u.username=? and us.stock_symbol=?;"))) {
+      echo "Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error;
+      die();
+    }
+
+    if (!$stmt->bind_param("ss", $username, $stockSymbol)) {
+          echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+    }
+
+    if (!$stmt->execute()) {
+      echo "Execute failed: (" . $mysqli->errno . ") " . $mysqli->error;
+    }
+
+    if (!($res = $stmt->get_result())) {
+      echo "Getting result set failed: (" . $stmt->errno . ") " . $stmt->error;
+    }
+
+    // No results were returned, exit.
+    if ($res->num_rows === 0) {
+      return false;
+    }
+
+    return true;
   }
 
   function addStockToStocksTable($stockSymbol) {
     global $mysqli;
 
-    // stockAlreadyExists();
+    // Exit this function if stock already exists
+    if (stockAlreadyExists($stockSymbol)) {
+      return;
+    }
 
-
-    // Make Yahoo API call to get JSON Result set back
-    // Echo out to test
+    // Make Yahoo API call to get stock info
     $stockInfo = getStockInfo($stockSymbol);
 
     if ($stockInfo['stockName'] === 'N/A') {
@@ -77,8 +150,35 @@
       echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
       die();
     }
+  }
 
-    echo "addStockSuccessful";
+  function stockAlreadyExists($stockSymbol) {
+    global $mysqli;
+
+    // Prepare the select statment
+    if (!($stmt = $mysqli->prepare("SELECT id FROM user_stocks WHERE stock_symbol=?;"))) {
+      echo "Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error;
+      die();
+    }
+
+    if (!$stmt->bind_param("s", $stockSymbol)) {
+          echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+    }
+
+    if (!$stmt->execute()) {
+      echo "Execute failed: (" . $mysqli->errno . ") " . $mysqli->error;
+    }
+
+    if (!($res = $stmt->get_result())) {
+      echo "Getting result set failed: (" . $stmt->errno . ") " . $stmt->error;
+    }
+
+    // No results were returned, exit.
+    if ($res->num_rows === 0) {
+      return false;
+    }
+
+    return true;
   }
 
   function getStockInfo($stockSymbol) {

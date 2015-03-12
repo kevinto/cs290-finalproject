@@ -22,6 +22,6 @@ CREATE TABLE user_has_stocks (
   amount INT UNSIGNED NOT NULL,
   PRIMARY KEY (id), UNIQUE (user_id, stock_id),
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-  FOREIGN KEY (stock_id) REFERENCES stocks(id) ON DELETE CASCADE
+  FOREIGN KEY (stock_id) REFERENCES user_stocks(id) ON DELETE CASCADE
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

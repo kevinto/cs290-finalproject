@@ -82,7 +82,9 @@ function addUserStock() {
           case 'emptyParams':
             errContainer.innerText = 'Please enter a stock symbol and amount owned.';
             break;
-          case 'addStockSuccessful':
+          case 'stockAssociationAlreadyExists':
+            errContainer.innerText = 'Stock is already associated with user. If you want to modify the quantity owned for a currently monitored stock, then you can modify the quanity below.';
+          case 'stockAssociationSuccessful':
             clearNewStockFields();
             // Add code here to refresh the table
         }
