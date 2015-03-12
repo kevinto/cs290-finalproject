@@ -121,7 +121,6 @@ function registerUser() {
     birthday: birthday
   };
 
-  // callLoginPhp('registerUser', regUserFunc, userRegParams);
   callLoginPhp(regUserFunc, userRegParams);
 
   return false;
@@ -146,11 +145,10 @@ function clearUsername() {
 * @param {object} returnFunc - function that is executed after PHP
 *                              backend is done executing
 * @param {object} postParams - params you want to pass to the PHP backend
-* @param {bool} isSynchronous - make this call a sync
 */
 // Here optional parameters is supposed to be an array
 // function callLoginPhp(phpFuncName, returnFunc, optionalParams) {
-function callLoginPhp(returnFunc, postParams, isSynchronous) {
+function callLoginPhp(returnFunc, postParams) {
   if (typeof(postParams) === 'undefined') {
     postParams = '';
   }

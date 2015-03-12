@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>Stock App Landing Page</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/login.css" rel="stylesheet">
+    <link href="css/app.css" rel="stylesheet">
     <script src='js/login.js'></script>
     <script src='js/app.js'></script>
   </head>
@@ -32,15 +32,20 @@
         <h1>Add Stock Section:</h1>
         <p>
           In the form below, you can add a stock to monitor. In order to add a stock, you need to enter the stock
-          symbol. Some examples of stock symbols that you can enter are: "goog", "appl", "msft".
+          symbol and the number of stocks owned. Some examples of stock symbols that you can enter are: "goog", "appl", "msft".
         </p>
-        <form class="form-inline" role="form">
+        <form class="form-inline" role="form" onsubmit="return addUserStock();">
           <div class="form-group">
-            <label class="sr-only" for="inputEmail">Stock Symbol Input</label>
+            <label class="sr-only" for="inputStockSym">Stock Symbol Input</label>
             <input type="text" class="form-control" id="inputStockSym" placeholder="Stock Symbol (ex: goog)">
+          </div>
+          <div class="form-group">
+            <label class="sr-only" for="inputStockAmount"># of Stocks Owned</label>
+            <input type="number" class="form-control" id="inputStockAmount" placeholder="# of Stocks Owned">
           </div>
           <button type="submit" class="btn btn-primary">Add Stock to Monitor</button>
         </form>
+        <p id="errorMsgs"></p>
       </div>
       <div id="current-stocks-held">
         <br>

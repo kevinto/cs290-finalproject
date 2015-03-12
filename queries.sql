@@ -6,3 +6,22 @@ CREATE TABLE users (
   birthday DATETIME NOT NULL,
   PRIMARY KEY (id), UNIQUE (username, email)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE user_stocks (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  stock_name VARCHAR(100) NOT NULL,
+  stock_symbol VARCHAR(100) NOT NULL,
+  stock_price INT(10) NOT NULL,
+  PRIMARY KEY (id), UNIQUE (stock_name,stock_symbol)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE user_has_stocks (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  user_id INT UNSIGNED NOT NULL,
+  stock_id INT UNSIGNED NOT NULL,
+  amount INT UNSIGNED NOT NULL,
+  PRIMARY KEY (id), UNIQUE (user_id, stock_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (stock_id) REFERENCES stocks(id) ON DELETE CASCADE
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
