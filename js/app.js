@@ -71,22 +71,21 @@ function addUserStock() {
   var addStockReturnFunc = function(request){
     return function() {
       if(request.readyState == 4) {
-        // var resultObj = JSON.parse(request.responseText);
+        var errContainer = document.getElementById('errorMsgs');
+        errContainer.innerText = '';
 
-        // switch (resultObj.status) {
-        //   case 'notLoggedIn':
-        //     EnableNotLoggedInMode();
-        //     break;
-        //   case 'loggedIn':
-        //     EnableLoggedInMode(resultObj.username); 
-
-        //     generateUserStkTable();
-        //     break;
-        //   default:
-        //     var signedOutHeader = document.getElementById('not-loggedin-intro');
-        //     signedOutHeader.innerText = 'Something is wrong at the server. Please try again later.';
-        //     break;
-        // }
+        switch (request.responseText) {
+          case 'invalidStockEntered':
+            errContainer.innerText = 'Please enter another stock symbol. The one you entered cannot be found.';
+            clearNewStockFields();
+            break;
+          case 'emptyParams':
+            errContainer.innerText = 'Please enter a stock symbol and amount owned.';
+            break;
+          case 'addStockSuccessful':
+            clearNewStockFields();
+            // Add code here to refresh the table
+        }
         console.log(request.responseText);
       }
     }
@@ -102,6 +101,11 @@ function addUserStock() {
   callAppPhp(addStockReturnFunc, stockAddParams);
 
   return false;
+}
+
+function clearNewStockFields() {
+  document.getElementById('inputStockSym').value = '';
+  document.getElementById('inputStockAmount').value = ''; 
 }
 
 /*

@@ -11,7 +11,7 @@ CREATE TABLE user_stocks (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   stock_name VARCHAR(100) NOT NULL,
   stock_symbol VARCHAR(100) NOT NULL,
-  stock_price INT(10) NOT NULL,
+  stock_price DECIMAL(11,4) NOT NULL,
   PRIMARY KEY (id), UNIQUE (stock_name,stock_symbol)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

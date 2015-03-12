@@ -68,12 +68,10 @@
 
       if (!isset($_SESSION['username'])) {
         $returnArr['status'] = "notLoggedIn";
-        // echo "notLoggedIn";
       }
       else {
         $returnArr['status'] = "loggedIn";
         $returnArr['username'] = $_SESSION['username'];
-        // echo "loggedIn as $_SESSION[username]";
       }
 
       $jsonReturn = json_encode($returnArr);
