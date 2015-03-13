@@ -1,8 +1,12 @@
+/*
+* Checks if the current user is logged on and enables the
+* appropriate elements
+*/
 function checkIfSignedInForAppPage() {
   // Create Return function
-  var signOnReturnFunc = function(request){
+  var signOnReturnFunc = function(request) {
     return function() {
-      if(request.readyState == 4) {
+      if (request.readyState == 4) {
         var resultObj = JSON.parse(request.responseText);
 
         switch (resultObj.status) {
@@ -10,13 +14,14 @@ function checkIfSignedInForAppPage() {
             EnableNotLoggedInMode();
             break;
           case 'loggedIn':
-            EnableLoggedInMode(resultObj.username); 
+            EnableLoggedInMode(resultObj.username);
 
             generateUserStkTable();
             break;
           default:
             var signedOutHeader = document.getElementById('not-loggedin-intro');
-            signedOutHeader.innerText = 'Something is wrong at the server. Please try again later.';
+            signedOutHeader.innerText = 'Something is wrong at the server.' +
+              'Please try again later.';
             break;
         }
       }
@@ -25,7 +30,7 @@ function checkIfSignedInForAppPage() {
 
   // Create Php parameters
   var userParams = {
-    checkIfSignedIn : true,
+    checkIfSignedIn: true
   };
 
   callLoginPhp(signOnReturnFunc, userParams);
@@ -33,6 +38,10 @@ function checkIfSignedInForAppPage() {
   return false;
 }
 
+/*
+* Enables the logged in mode of the app page
+* @param {string} username - the user name
+*/
 function EnableLoggedInMode(username) {
  var signedInHeader = document.getElementById('user-intro');
   signedInHeader.innerText = 'Hi, ' + username;
@@ -41,9 +50,13 @@ function EnableLoggedInMode(username) {
   signInBtn.style.display = 'none';
 }
 
+/*
+* Enables the not logged in mode of the app page
+*/
 function EnableNotLoggedInMode() {
   var signedOutHeader = document.getElementById('not-loggedin-intro');
-  signedOutHeader.innerText = 'You are not currently signed in. Please click the sign in button on the top of the page.';
+  signedOutHeader.innerText = 'You are not currently signed in. ' +
+    'Please click the sign in button on the top of the page.';
 
   var logoutBtn = document.getElementById('logout-button');
   logoutBtn.style.display = 'none';
@@ -58,6 +71,9 @@ function EnableNotLoggedInMode() {
   viewFriendSection.style.display = 'none';
 }
 
+/*
+* Generates the user stock table
+*/
 function generateUserStkTable() {
   // Clear pre-existing table if it exists
   var oldTable = document.getElementById('userStockTable');
@@ -67,19 +83,26 @@ function generateUserStkTable() {
   }
 
   // Define a return function
-  var userStockTableFunc = function(request){
+  var userStockTableFunc = function(request) {
     return function() {
-      if(request.readyState == 4) {
+      if (request.readyState == 4) {
 
         // Get div to populate with data
         var containerId = 'current-stocks-held';
         var container = document.getElementById(containerId);
 
+        // Clean up error text
+        var errorText = document.getElementById('stockTableErrorMsgs');
+        if (errorText !== null) {
+            var errParent = document.getElementById('current-stocks-held');
+            errParent.removeChild(errorText);
+        }
+
         // If no data is returned, exit the function
         if (request.responseText === 'noRecords') {
           var errText = document.createElement('p');
-          errText.id = 'errorMsgs';
-          errText.innerText = "No stocks currently monitored";
+          errText.id = 'stockTableErrorMsgs';
+          errText.innerText = 'No stocks currently monitored';
           container.appendChild(errText);
           return;
         }
@@ -102,7 +125,7 @@ function generateUserStkTable() {
 
   // Create object that holds the SQL query parameters
   var userParams = {
-    getUserStocks: true,
+    getUserStocks: true
   };
 
   callAppPhp(userStockTableFunc, userParams);
@@ -126,13 +149,14 @@ function addTable(targetDiv, dispObjArray, tableID, addDeleteBtn) {
 
   var myTableDiv = document.getElementById(targetDiv);
 
+  // Create the table element
   var table = document.createElement('table');
   table.className = 'table';
   table.id = tableID;
 
   // Create the header columns
-  var headersAlreadyCreated = false
-  for (var i = 0; i < dispObjArray.length; i++){
+  var headersAlreadyCreated = false;
+  for (var i = 0; i < dispObjArray.length; i++) {
     if (!headersAlreadyCreated) {
       var tr = document.createElement('tr');
       table.appendChild(tr);
@@ -163,22 +187,28 @@ function addTable(targetDiv, dispObjArray, tableID, addDeleteBtn) {
     // Create a delete button at the end of the row
     if (addDeleteBtn === true) {
       var td = document.createElement('td');
-      var buttonAction = '"deleteStockAssociation(&quot;' + dispObjArray[i]['Stock Symbol'] + '&quot;);"';
-      td.innerHTML = '<button class="btn btn-danger btn-small" onclick=' + buttonAction + '>Delete</button>';
+      var buttonAction = '"deleteStockAssociation(&quot;' +
+        dispObjArray[i]['Stock Symbol'] + '&quot;);"';
+      td.innerHTML = '<button class="btn btn-danger btn-small" onclick=' +
+        buttonAction + '>Delete</button>';
       tr.appendChild(td);
     }
-    
   }
 
   myTableDiv.appendChild(table);
 }
 
+/*
+* Removes the association between the current user
+* and the specified stock
+* @param {string} stockSymbol - the stock symbol
+*/
 function deleteStockAssociation(stockSymbol) {
 
   // Define a return function
-  var deleteStockAssociationFunc = function(request){
+  var deleteStockAssociationFunc = function(request) {
     return function() {
-      if(request.readyState == 4) {
+      if (request.readyState == 4) {
         generateUserStkTable();
       }
     }
@@ -193,25 +223,31 @@ function deleteStockAssociation(stockSymbol) {
   callAppPhp(deleteStockAssociationFunc, postParams);
 }
 
+/*
+* Handles the form submission of a user trying to
+* add or modify a stock
+*/
 function addOrModUserStock() {
   // Get form values
   var stockSymbol = document.getElementById('inputStockSym').value;
   var stockAmt = document.getElementById('inputStockAmount').value;
 
   // Create Return function
-  var addOrModStockReturnFunc = function(request){
+  var addOrModStockReturnFunc = function(request) {
     return function() {
-      if(request.readyState == 4) {
+      if (request.readyState == 4) {
         var errContainer = document.getElementById('errorMsgs');
         errContainer.innerText = '';
 
         switch (request.responseText) {
           case 'invalidStockEntered':
-            errContainer.innerText = 'Please enter another stock symbol. The one you entered cannot be found.';
+            errContainer.innerText = 'Please enter another stock symbol. ' +
+              'The one you entered cannot be found.';
             clearNewStockFields();
             break;
           case 'emptyParams':
-            errContainer.innerText = 'Please enter a stock symbol and amount owned.';
+            errContainer.innerText = 'Please enter a stock symbol ' +
+              'and amount owned.';
             break;
           case 'stockAssociationSuccessful':
           case 'quantityUpdateSuccessful':
@@ -225,9 +261,9 @@ function addOrModUserStock() {
 
   // Create Php parameters
   var stockAddOrModParams = {
-    addOrModUserStock : true,
-    stockSymbol : stockSymbol,
-    stockAmt : stockAmt
+    addOrModUserStock: true,
+    stockSymbol: stockSymbol,
+    stockAmt: stockAmt
   };
 
   callAppPhp(addOrModStockReturnFunc, stockAddOrModParams);
@@ -235,9 +271,12 @@ function addOrModUserStock() {
   return false;
 }
 
+/*
+* Clears the new stock form
+*/
 function clearNewStockFields() {
   document.getElementById('inputStockSym').value = '';
-  document.getElementById('inputStockAmount').value = ''; 
+  document.getElementById('inputStockAmount').value = '';
 }
 
 /*
@@ -270,13 +309,13 @@ function callAppPhp(returnFunc, postParams) {
     }
   }
 
-  if (!request){
+  if (!request) {
     return false;
   }
 
   request.onreadystatechange = returnFunc(request);
   request.open('POST', url, true);
-  request.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+  request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
   request.send(postParamsStr);
   return request;
 }

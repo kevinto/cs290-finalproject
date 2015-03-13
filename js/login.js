@@ -1,9 +1,15 @@
-function determineLoginOrReg() {
+/*
+* Hides the registration form
+*/
+function hideRegistration() {
   // Hide the registration form
   var regForm = document.getElementById('form-registration');
   regForm.style.display = 'none';
 }
 
+/*
+* Shows the registration form
+*/
 function showRegistration() {
   var regForm = document.getElementById('form-registration');
   regForm.style.display = 'inline';
@@ -12,6 +18,9 @@ function showRegistration() {
   signInForm.style.display = 'none';
 }
 
+/*
+* Shows the sign-in form
+*/
 function showSignIn() {
   var regForm = document.getElementById('form-registration');
   regForm.style.display = 'none';
@@ -20,31 +29,37 @@ function showSignIn() {
   signInForm.style.display = 'inline';
 }
 
+/*
+* Validates if sign-in information is correct
+*/
 function validateSignOn() {
 
-  // Get form values 
+  // Get form values
   var username = document.getElementById('inputUsername').value;
   var password = document.getElementById('inputPassword').value;
 
   // Create Return function
-  var signOnReturnFunc = function(request){
+  var signOnReturnFunc = function(request) {
     return function() {
-      if(request.readyState == 4) {
+      if (request.readyState == 4) {
         var errContainer = document.getElementById('signOnErrMessages');
 
         switch (request.responseText) {
           case 'emptyParams':
-            errContainer.innerText = 'Please fill out all the values and re-submit.';
+            errContainer.innerText = 'Please fill out all the values ' +
+              ' and re-submit.';
             break;
           case 'authenFailed':
             clearSignOnInfo();
-            errContainer.innerText = 'Username or password is incorrect. Please try again.';
+            errContainer.innerText = 'Username or password is ' +
+              'incorrect. Please try again.';
             break;
           case 'loginSuccessful':
             location.replace('app.html');
             break;
           default:
-            errContainer.innerText = 'Please retry or call an administrator. There was an error at the server.';
+            errContainer.innerText = 'Please retry or call an ' +
+              'administrator. There was an error at the server.';
             break;
         }
       }
@@ -55,7 +70,7 @@ function validateSignOn() {
   var userParams = {
     validateSignOn: true,
     username: username,
-    password: password,
+    password: password
   };
 
   // callLoginPhp('validateSignOn', signOnReturnFunc, userParams);
@@ -64,11 +79,17 @@ function validateSignOn() {
   return false;
 }
 
+/*
+* Clears the sign-in form
+*/
 function clearSignOnInfo() {
   var username = document.getElementById('inputUsername').value = '';
   var password = document.getElementById('inputPassword').value = '';
 }
 
+/*
+* Attempts to register the user
+*/
 function registerUser() {
 
   // Get form values
@@ -80,26 +101,30 @@ function registerUser() {
   var birthday = document.getElementById('birthday').value;
 
   // Create Return function
-  var regUserFunc = function(request){
+  var regUserFunc = function(request) {
     return function() {
-      if(request.readyState == 4) {
+      if (request.readyState == 4) {
         var errContainer = document.getElementById('regErrMessages');
 
         switch (request.responseText) {
           case 'emptyParams':
-            errContainer.innerText = 'Please fill out all the values and re-submit.';
+            errContainer.innerText = 'Please fill out all ' +
+              'the values and re-submit.';
             break;
           case 'passwordsNotMatching':
             clearRegPasswords();
-            errContainer.innerText = 'Please re-enter your passwords. They do not match.';
+            errContainer.innerText = 'Please re-enter your ' +
+              'passwords. They do not match.';
             break;
           case 'emailsNotMatching':
             clearRegEmails();
-            errContainer.innerText = 'Please re-enter your emails. They do not match.';
+            errContainer.innerText = 'Please re-enter your emails.' +
+              ' They do not match.';
             break;
           case 'usernameDuplicate':
             clearUsername();
-            errContainer.innerText = 'Username already exists. Please enter another username.';
+            errContainer.innerText = 'Username already exists. ' +
+              'Please enter another username.';
             break;
           default:
             alert('Registration Successful. Please Login.');
@@ -126,16 +151,25 @@ function registerUser() {
   return false;
 }
 
+/*
+* Clears the registration passwords
+*/
 function clearRegPasswords() {
   document.getElementById('regPassword').value = '';
   document.getElementById('regRepeatPassword').value = '';
 }
 
+/*
+* Clears the registration emails
+*/
 function clearRegEmails() {
   document.getElementById('regEmail').value = '';
   document.getElementById('regRepeatEmail').value = '';
 }
 
+/*
+* Clears the user name
+*/
 function clearUsername() {
   document.getElementById('regUsername').value = '';
 }
@@ -172,23 +206,26 @@ function callLoginPhp(returnFunc, postParams) {
     }
   }
 
-  if (!request){
+  if (!request) {
     return false;
   }
 
   request.onreadystatechange = returnFunc(request);
   request.open('POST', url, true);
-  request.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+  request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
   request.send(postParamsStr);
   return request;
 }
 
+/*
+* Logs out the current signed in user
+*/
 function logout() {
 
   // Create Return function
-  var signOffReturnFunc = function(request){
+  var signOffReturnFunc = function(request) {
     return function() {
-      if(request.readyState == 4) {
+      if (request.readyState == 4) {
         location.replace('index.html');
       }
     }
@@ -196,18 +233,17 @@ function logout() {
 
   // Create Php parameters
   var userParams = {
-    logoff: true,
+    logoff: true
   };
 
   callLoginPhp(signOffReturnFunc, userParams);
 
-  return false; 
+  return false;
 }
 
-function isUserLoggedIn() {
-
-}
-
+/*
+* Redirects to the login page
+*/
 function goToLogin() {
   location.replace('login.html');
 }
