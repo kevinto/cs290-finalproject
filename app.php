@@ -25,19 +25,50 @@
   if ($_SERVER['REQUEST_METHOD'] === 'POST' and count($_POST) > 0) {
 
     // Add a stock for the user 
-    if (isset($_POST['addUserStock']) && isset($_POST['stockSymbol'])
+    if (isset($_POST['addOrModUserStock']) && isset($_POST['stockSymbol'])
       && isset($_POST['stockAmt'])) {
 
-      addUserStock($_SESSION['username'], $_POST['stockSymbol'], $_POST['stockAmt']);
+      addOrModUserStock($_SESSION['username'], $_POST['stockSymbol'], $_POST['stockAmt']);
     }
 
     // Get all user's stock
     if (isset($_POST['getUserStocks'])) {
       getUserStocks($_SESSION['username']);
     }
+    
+    // Get all user's stock
+    if (isset($_POST['deleteStockAssociation'])) {
+      deleteStockAssociation($_SESSION['username'], $_POST['stockSymbol']);
+    }
   }
 
-  function addUserStock($username, $stockSymbol, $stockAmt) {
+  function deleteStockAssociation($username, $stockSymbol) {
+    global $mysqli;
+
+    // Prepare the insert statment
+    if (!($stmt = $mysqli->prepare("DELETE FROM user_has_stocks 
+      WHERE user_id IN (SELECT id FROM users WHERE username=?) 
+      AND stock_id IN (SELECT id FROM user_stocks WHERE stock_symbol=?);"))) {
+      echo "Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error;
+      die();
+    }
+
+    // Add values to SQL insert statement
+    if (!$stmt->bind_param("ss", $username, $stockSymbol)) {
+      echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+      die();
+    }
+
+    // Execute sql statement
+    if (!$stmt->execute()) {
+      echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+      die();
+    }
+
+    echo "userStockDeleteSuccessful";
+  }
+
+  function addOrModUserStock($username, $stockSymbol, $stockAmt) {
     if ($stockSymbol === '' || $stockAmt === '') {
       echo 'emptyParams';
       die();
@@ -49,7 +80,7 @@
       associateStockToUser($username, $stockSymbol, $stockAmt);
       echo 'stockAssociationSuccessful';
       die();
-    } 
+    }
   }
 
   function associateStockToUser($username, $stockSymbol, $stockAmt) {
@@ -62,7 +93,8 @@
 
     // Exit this workflow if association already exists
     if (stockAlreadyAssociatedToUser($username, $stockSymbol)) {
-      echo "stockAssociationAlreadyExists";
+      // Update the quantity
+      updateUserStockQuantity($username, $stockSymbol, $stockAmt);
       die();
     }
 
@@ -87,6 +119,32 @@
       echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
       die();
     }
+  }
+
+  function updateUserStockQuantity($username, $stockSymbol, $stockAmt) {
+    global $mysqli;
+
+    // Prepare the insert statment
+    if (!($stmt = $mysqli->prepare("UPDATE user_has_stocks SET amount=?
+      WHERE user_id IN (SELECT id FROM users WHERE username=?) 
+      AND stock_id IN (SELECT id FROM user_stocks WHERE stock_symbol=?);"))) {
+      echo "Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error;
+      die();
+    }
+
+    // Add values to SQL insert statement
+    if (!$stmt->bind_param("iss", $stockAmt, $username, $stockSymbol)) {
+      echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+      die();
+    }
+
+    // Execute sql statement
+    if (!$stmt->execute()) {
+      echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+      die();
+    }
+
+    echo "quantityUpdateSuccessful";
   }
 
   function stockAlreadyAssociatedToUser($username, $stockSymbol) {
@@ -259,7 +317,15 @@
       $res->data_seek($row_no);
       $row = $res->fetch_assoc();
 
-      $row["Price x Quantity"] = $row["Stock Price"] * $row["Quantity Monitored"];
+      if (floatval($row["Stock Price"]) === 0.0000) {
+        $row["Stock Price"] = "Stock Price Not Found";
+        $row["Price x Quantity"] = "N/A";
+      }
+      else {
+        $row["Price x Quantity"] = $row["Stock Price"] * $row["Quantity Monitored"];
+        // echo var_dump($row["Stock Price"]);
+      }
+
 
       $stocksArr[] = json_encode($row);
     }

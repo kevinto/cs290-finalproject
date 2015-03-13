@@ -59,7 +59,12 @@ function EnableNotLoggedInMode() {
 }
 
 function generateUserStkTable() {
-  // UI Table columns: stock name, stock symbol, price per share, quantity monitored, price x quantity
+  // Clear pre-existing table if it exists
+  var oldTable = document.getElementById('userStockTable');
+  if (oldTable !== null) {
+    var tableParent = document.getElementById('current-stocks-held');
+    tableParent.removeChild(oldTable);
+  }
 
   // Define a return function
   var userStockTableFunc = function(request){
@@ -90,7 +95,7 @@ function generateUserStkTable() {
         }
 
         // Generate a table
-        addTable(containerId, tableParamObj, 'userStockTable');
+        addTable(containerId, tableParamObj, 'userStockTable', true);
       }
     }
   };
@@ -111,8 +116,13 @@ function generateUserStkTable() {
 * @param {array} dispObjArray - an array of JSON objects containing
 *                                                     database tuples
 * @param {array} tableID - the id of the table you want to creates
+* @param {bool} addDeleteBtn - True if you want to add a delete button.
+*                               False, if otherwise.
 */
-function addTable(targetDiv, dispObjArray, tableID) {
+function addTable(targetDiv, dispObjArray, tableID, addDeleteBtn) {
+  if (typeof(addDeleteBtn) === 'undefined') {
+    addDeleteBtn = false;
+  }
 
   var myTableDiv = document.getElementById(targetDiv);
 
@@ -149,18 +159,47 @@ function addTable(targetDiv, dispObjArray, tableID) {
         tr.appendChild(td);
       }
     }
+
+    // Create a delete button at the end of the row
+    if (addDeleteBtn === true) {
+      var td = document.createElement('td');
+      var buttonAction = '"deleteStockAssociation(&quot;' + dispObjArray[i]['Stock Symbol'] + '&quot;);"';
+      td.innerHTML = '<button class="btn btn-danger btn-small" onclick=' + buttonAction + '>Delete</button>';
+      tr.appendChild(td);
+    }
+    
   }
 
   myTableDiv.appendChild(table);
 }
 
-function addUserStock() {
+function deleteStockAssociation(stockSymbol) {
+
+  // Define a return function
+  var deleteStockAssociationFunc = function(request){
+    return function() {
+      if(request.readyState == 4) {
+        generateUserStkTable();
+      }
+    }
+  };
+
+  // Create object that holds the SQL query parameters
+  var postParams = {
+    deleteStockAssociation: true,
+    stockSymbol: stockSymbol
+  };
+
+  callAppPhp(deleteStockAssociationFunc, postParams);
+}
+
+function addOrModUserStock() {
   // Get form values
   var stockSymbol = document.getElementById('inputStockSym').value;
   var stockAmt = document.getElementById('inputStockAmount').value;
 
   // Create Return function
-  var addStockReturnFunc = function(request){
+  var addOrModStockReturnFunc = function(request){
     return function() {
       if(request.readyState == 4) {
         var errContainer = document.getElementById('errorMsgs');
@@ -174,11 +213,10 @@ function addUserStock() {
           case 'emptyParams':
             errContainer.innerText = 'Please enter a stock symbol and amount owned.';
             break;
-          case 'stockAssociationAlreadyExists':
-            errContainer.innerText = 'Stock is already associated with user. If you want to modify the quantity owned for a currently monitored stock, then you can modify the quanity below.';
           case 'stockAssociationSuccessful':
+          case 'quantityUpdateSuccessful':
             clearNewStockFields();
-            // Add code here to refresh the table
+            generateUserStkTable();
         }
         console.log(request.responseText);
       }
@@ -186,13 +224,13 @@ function addUserStock() {
   };
 
   // Create Php parameters
-  var stockAddParams = {
-    addUserStock : true,
+  var stockAddOrModParams = {
+    addOrModUserStock : true,
     stockSymbol : stockSymbol,
     stockAmt : stockAmt
   };
 
-  callAppPhp(addStockReturnFunc, stockAddParams);
+  callAppPhp(addOrModStockReturnFunc, stockAddOrModParams);
 
   return false;
 }

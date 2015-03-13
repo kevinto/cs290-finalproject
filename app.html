@@ -29,12 +29,12 @@
         <h3 class="text-muted" id="not-loggedin-intro"></h3>
       </div>
       <div id="new-stock-add">
-        <h1>Add Stock Section:</h1>
+        <h1>Add/Modify Stock Section:</h1>
         <p>
-          In the form below, you can add a stock to monitor. In order to add a stock, you need to enter the stock
-          symbol and the number of stocks owned. Some examples of stock symbols that you can enter are: "goog", "appl", "msft".
+          In the form below, you can add a stock to monitor or update the quantity of a stock that you already own. In order to add a stock, you need to enter the stock
+          symbol and the number of stocks owned. In order to modify a stock that you are already monitoring, enter the stock symbol and the updated quantity. Some examples of stock symbols that you can enter are: "goog", "appl", "msft".
         </p>
-        <form class="form-inline" role="form" onsubmit="return addUserStock();">
+        <form class="form-inline" role="form" onsubmit="return addOrModUserStock();">
           <div class="form-group">
             <label class="sr-only" for="inputStockSym">Stock Symbol Input</label>
             <input type="text" class="form-control" id="inputStockSym" placeholder="Stock Symbol (ex: goog)">
@@ -51,9 +51,6 @@
         <br>
         <br>
         <h1>Currently Monitored Stocks Section:</h1>
-      </div>
-      <div id="friends-stocks">
-        <h1>Friend's Stocks:</h1>
       </div>
     </div>
   </body>
