@@ -9,7 +9,6 @@
     <script src='js/app.js'></script>
   </head>
   <body onload="checkIfSignedInForAppPage();">
-    <!-- Static navbar -->
     <nav class="navbar navbar-default navbar-static-top">
       <div class="container">
         <div class="navbar-header">
@@ -20,7 +19,7 @@
             <li><button type="button" class="btn btn-default navbar-btn" id="logout-button" onclick="logout();">Logoff</button></li>
             <li><button type="button" class="btn btn-default navbar-btn" id="signin-button" onclick="goToLogin();">Sign In</button></li>
           </ul>
-        </div><!--/.nav-collapse -->
+        </div>
       </div>
     </nav>
     <div class="container">
@@ -32,7 +31,7 @@
         <h1>Add/Modify Stock Section:</h1>
         <p>
           In the form below, you can add a stock to monitor or update the quantity of a stock that you already own. In order to add a stock, you need to enter the stock
-          symbol and the number of stocks owned. In order to modify a stock that you are already monitoring, enter the stock symbol and the updated quantity. Some examples of stock symbols that you can enter are: "goog", "appl", "msft".
+          symbol and the number of stocks owned. In order to modify a stock that you are already monitoring, enter the stock symbol and the updated quantity. Some examples of stock symbols that you can enter are: "goog", "appl", "msft", "abt". You can get some popular stock ticker symbols <a href="http://en.wikipedia.org/wiki/List_of_S%26P_500_companies">here</a>.
         </p>
         <form class="form-inline" role="form" onsubmit="return addOrModUserStock();">
           <div class="form-group">
@@ -51,6 +50,7 @@
         <br>
         <br>
         <h1>Currently Monitored Stocks Section:</h1>
+        <button class="btn btn-lg btn-primary btn-block" type="button" onclick="generateUserStkTable();">Refresh Monitored Stocks</button> 
       </div>
     </div>
   </body>

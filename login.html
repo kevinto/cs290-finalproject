@@ -8,7 +8,7 @@
     <link href="css/login.css" rel="stylesheet">
     <script src='js/login.js'></script>
   </head>
-  <body onload="determineLoginOrReg();">
+  <body onload="hideRegistration();">
     <div class="container">
       <div class="header">
         <h3 class="text-muted">Stock Tracking Utility</h3>
@@ -17,9 +17,9 @@
         <h2 class="form-signin-heading">Please sign in</h2>
         <div id="signOnErrMessages"></div>
         <label for="inputUsername" class="sr-only">Username</label>
-        <input type="text" id="inputUsername" class="form-control" placeholder="Username" required autofocus minlength="8" maxlength="30">
+        <input type="text" id="inputUsername" class="form-control" placeholder="Username" required autofocus pattern=".{8,30}" title="8 to 30 characters">
         <label for="inputPassword" class="sr-only">Password</label>
-        <input type="password" id="inputPassword" class="form-control" placeholder="Password" required minlength="8" maxlength="30">
+        <input type="password" id="inputPassword" class="form-control" placeholder="Password" required pattern=".{8,30}" title="8 to 30 characters">
         <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
         <button class="btn btn-lg btn-primary btn-block" type="button" onclick="showRegistration();">Register</button>
       </form>
@@ -30,19 +30,19 @@
         <div id="regErrMessages"></div>
         <div class="form-group col-lg-12">
           <label>Username (min characters: 8. max characters: 30)</label>
-          <input type="text" id="regUsername" class="form-control" minlength="8" maxlength="30" value="">
+          <input type="text" id="regUsername" class="form-control" required pattern=".{8,30}" title="8 to 30 characters" value="">
         </div>
         <div class="form-group col-lg-12">
           <label>Birthday: </label>
-          <input type="date" id="birthday" min="1800-01-01" max="9999-01-01">
+          <input type="date" id="birthday" min="1800-01-01" max="2999-01-01">
         </div>
         <div class="form-group col-lg-6">
           <label>Password (min characters: 8. max characters: 30)</label>
-          <input type="password" id="regPassword" class="form-control" value="" minlength="8" maxlength="30">
+          <input type="password" id="regPassword" class="form-control" value="" required pattern=".{8,30}" title="8 to 30 characters">
         </div>
         <div class="form-group col-lg-6">
           <label>Repeat Password (min characters: 8. max characters: 30)</label>
-          <input type="password" id="regRepeatPassword" class="form-control"  value="" minlength="8" maxlength="30">
+          <input type="password" id="regRepeatPassword" class="form-control"  value="" required pattern=".{8,30}" title="8 to 30 characters">
         </div>
         <div class="form-group col-lg-6">
           <label>Email Address</label>

@@ -24,24 +24,30 @@
 
   if ($_SERVER['REQUEST_METHOD'] === 'POST' and count($_POST) > 0) {
 
-    // Add a stock for the user 
+    // Add/Modify a stock for the user 
     if (isset($_POST['addOrModUserStock']) && isset($_POST['stockSymbol'])
       && isset($_POST['stockAmt'])) {
 
       addOrModUserStock($_SESSION['username'], $_POST['stockSymbol'], $_POST['stockAmt']);
     }
 
-    // Get all user's stock
+    // Get all user's stock. This refreshes all the stock prices also
     if (isset($_POST['getUserStocks'])) {
+      refreshStockPrices($_SESSION['username']);
       getUserStocks($_SESSION['username']);
     }
     
-    // Get all user's stock
+    // Deletes a specified user's stock
     if (isset($_POST['deleteStockAssociation'])) {
       deleteStockAssociation($_SESSION['username'], $_POST['stockSymbol']);
     }
   }
 
+  /*
+  * Purpose: Deletes a specified user's stock association
+  * @param {string} $username - the user name
+  * @param {string} $stockSymbol - the stock symbol
+  */
   function deleteStockAssociation($username, $stockSymbol) {
     global $mysqli;
 
@@ -68,6 +74,12 @@
     echo "userStockDeleteSuccessful";
   }
 
+  /*
+  * Purpose: Adds or modifies an existing stock for a user
+  * @param {string} $username - the user name
+  * @param {string} $stockSymbol - the stock symbol
+  * @param {int} $stockAmt - the stock 
+  */
   function addOrModUserStock($username, $stockSymbol, $stockAmt) {
     if ($stockSymbol === '' || $stockAmt === '') {
       echo 'emptyParams';
@@ -83,6 +95,12 @@
     }
   }
 
+  /*
+  * Purpose: Associate a stock to a user 
+  * @param {string} $username - the user name
+  * @param {string} $stockSymbol - the stock symbol
+  * @param {int} $stockAmt - the stock 
+  */
   function associateStockToUser($username, $stockSymbol, $stockAmt) {
     global $mysqli;
 
@@ -93,7 +111,6 @@
 
     // Exit this workflow if association already exists
     if (stockAlreadyAssociatedToUser($username, $stockSymbol)) {
-      // Update the quantity
       updateUserStockQuantity($username, $stockSymbol, $stockAmt);
       die();
     }
@@ -121,6 +138,12 @@
     }
   }
 
+  /*
+  * Purpose: Updates a user's stock quantity
+  * @param {string} $username - the user name
+  * @param {string} $stockSymbol - the stock symbol
+  * @param {int} $stockAmt - the stock 
+  */
   function updateUserStockQuantity($username, $stockSymbol, $stockAmt) {
     global $mysqli;
 
@@ -147,6 +170,11 @@
     echo "quantityUpdateSuccessful";
   }
 
+  /*
+  * Purpose: Checks if a stock is already associated to a user
+  * @param {string} $username - the user name
+  * @param {string} $stockSymbol - the stock symbol
+  */
   function stockAlreadyAssociatedToUser($username, $stockSymbol) {
     global $mysqli;
 
@@ -179,6 +207,10 @@
     return true;
   }
 
+  /*
+  * Purpose: Adds a stock to the stocks table
+  * @param {string} $stockSymbol - the stock symbol
+  */
   function addStockToStocksTable($stockSymbol) {
     global $mysqli;
 
@@ -215,6 +247,10 @@
     }
   }
 
+  /*
+  * Purpose: Checks to see if a stock already exists in the stocks table
+  * @param {string} $stockSymbol - the stock symbol
+  */
   function stockAlreadyExists($stockSymbol) {
     global $mysqli;
 
@@ -244,6 +280,11 @@
     return true;
   }
 
+  /*
+  * Purpose: Gets stock info (symbol, name, price) for a single stock
+  * @param {string} $stockSymbol - the stock symbol
+  * @returns {array} - the result stock object
+  */
   function getStockInfo($stockSymbol) {
     // Make Yahoo API call
     $outfilename = "quote.csv";
@@ -278,7 +319,7 @@
 
   /*
   * Purpose: Gets all the users's stocks
-  * @param {int} $username - the user name
+  * @param {string} $username - the user name
   * @return {object} - a JSON object all the customer's stocks 
   */
   function getUserStocks($username) {
@@ -332,5 +373,77 @@
 
     $finaljson = json_encode($stocksArr);
     echo $finaljson;
+  }
+
+  /*
+  * Purpose: Refreshes the stock price of all of a user's stocks
+  * @param {string} $username - the user name
+  */
+  function refreshStockPrices($username) {
+    global $mysqli;
+
+    // Prepare the select statment
+    if (!($stmt = $mysqli->prepare("SELECT us.stock_symbol 
+      FROM users u INNER JOIN user_has_stocks uhs ON u.id=uhs.user_id 
+      INNER JOIN user_stocks us ON uhs.stock_id=us.id 
+      WHERE u.username=?;"))) {
+      echo "Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error;
+      die();
+    }
+
+    if (!$stmt->bind_param("s", $username)) {
+          echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+    }
+
+    if (!$stmt->execute()) {
+      echo "Execute failed: (" . $mysqli->errno . ") " . $mysqli->error;
+    }
+
+    if (!($res = $stmt->get_result())) {
+      echo "Getting result set failed: (" . $stmt->errno . ") " . $stmt->error;
+    }
+
+    // No results were returned, exit.
+    if ($res->num_rows === 0) {
+      return;
+    }
+
+    // Generate the return object
+    for($row_no = ($res->num_rows - 1); $row_no >= 0; $row_no--) {
+      $res->data_seek($row_no);
+      $row = $res->fetch_assoc();
+
+      updateStockPrice($row["stock_symbol"]);
+    }
+  }
+
+  /*
+  * Purpose: Updates the stock price
+  * @param {string} $username - the user name
+  */
+  function updateStockPrice($stockSymbol) {
+    global $mysqli;
+
+    $resultArr = getStockInfo($stockSymbol);
+    $newStockPrice = $resultArr["stockPrice"];
+
+    // Prepare the insert statment
+    if (!($stmt = $mysqli->prepare("UPDATE user_stocks SET stock_price=?
+      WHERE stock_symbol=?;"))) {
+      echo "Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error;
+      die();
+    }
+
+    // Add values to SQL insert statement
+    if (!$stmt->bind_param("ds", $newStockPrice, $stockSymbol)) {
+      echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+      die();
+    }
+
+    // Execute sql statement
+    if (!$stmt->execute()) {
+      echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+      die();
+    }
   }
 ?>

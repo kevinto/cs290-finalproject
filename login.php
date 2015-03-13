@@ -80,6 +80,11 @@
     }
   }
 
+  /*
+  * Purpose: Checks login info for user
+  * @param {string} $username - the user name
+  * @param {string} $password - the password
+  */
   function validateSignOn($username, $password) {
     global $mysqli;
 
@@ -114,6 +119,15 @@
     return true;
   }
 
+  /*
+  * Purpose: Registers a user
+  * @param {string} $username - the user name
+  * @param {string} $password - the password
+  * @param {string} $passwordRepeated - the password repeated
+  * @param {string} $email - the email
+  * @param {string} $emailRepeated - the email repeated 
+  * @param {string} $birthday - the birthday date
+  */
   function registerUser($username, $password, $passwordRepeated, $email, $emailRepeated, $birthday) {
     global $mysqli;
 
@@ -157,6 +171,10 @@
     echo "registrationSuccessful";
   }
 
+  /*
+  * Purpose: Checks if a user name already exists
+  * @param {string} $username - the user name
+  */
   function usernameExists($username) {
     global $mysqli;
 
