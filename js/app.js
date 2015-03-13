@@ -104,7 +104,17 @@ function generateUserStkTable() {
           errText.id = 'stockTableErrorMsgs';
           errText.innerText = 'No stocks currently monitored';
           container.appendChild(errText);
+
+          // Hide the disclaimer
+          var disclaimer = document.getElementById('stock-disclaimer');
+          disclaimer.style.display = 'none';
+
           return;
+        }
+        else {
+          // Show the disclaimer
+          var disclaimer = document.getElementById('stock-disclaimer');
+          disclaimer.style.display = 'inline';
         }
 
         // Result is an array of JSON objects
@@ -118,7 +128,7 @@ function generateUserStkTable() {
         }
 
         // Generate a table
-        addTable(containerId, tableParamObj, 'userStockTable', true);
+        addStocksTable(containerId, tableParamObj, 'userStockTable', true);
       }
     }
   };
@@ -142,7 +152,7 @@ function generateUserStkTable() {
 * @param {bool} addDeleteBtn - True if you want to add a delete button.
 *                               False, if otherwise.
 */
-function addTable(targetDiv, dispObjArray, tableID, addDeleteBtn) {
+function addStocksTable(targetDiv, dispObjArray, tableID, addDeleteBtn) {
   if (typeof(addDeleteBtn) === 'undefined') {
     addDeleteBtn = false;
   }
@@ -172,7 +182,7 @@ function addTable(targetDiv, dispObjArray, tableID, addDeleteBtn) {
       headersAlreadyCreated = true;
     }
 
-    // Create the rows for the data
+    // Create the rows for the data from the database
     tr = document.createElement('tr');
     table.appendChild(tr);
     for (var property in dispObjArray[i]) {
@@ -183,6 +193,14 @@ function addTable(targetDiv, dispObjArray, tableID, addDeleteBtn) {
         tr.appendChild(td);
       }
     }
+
+    // Append 'More Info' link
+    var td = document.createElement('td');
+    var moreInfoURL = 'http://www.finance.yahoo.com/q?s=' +
+      dispObjArray[i]['Stock Symbol'];
+    td.innerHTML = '<a href=' + moreInfoURL +
+      ' target="_blank">More Info</a>';
+    tr.appendChild(td);
 
     // Create a delete button at the end of the row
     if (addDeleteBtn === true) {
